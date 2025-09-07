@@ -1,0 +1,13 @@
+[
+    {
+      "iconUrl": "https://repo.cypwn.xyz/assets/images/cypwn_small.png",
+      "name": "CyPwn IPA Library",
+      "sourceURL": "https://ipa.cypwn.xyz/cypwn.json"
+    },
+    {
+      "iconUrl":
+          "https://apptesters.org/wp-content/uploads/2024/04/AppTesters-Logo-Site-Icon.webp",
+      "name": "AppTesters IPA Repo",
+      "sourceURL": "https://repository.apptesters.org/"
+    }
+]
