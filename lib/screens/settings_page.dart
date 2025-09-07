@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             onPressed: () {
                               url_launcher.launchUrl(
                                 Uri.parse(
-                                  'https://github.com/asrma7/liveapps',
+                                  'https://github.com/asrma7/LiveContainer-Installer',
                                 ),
                               );
                             },
