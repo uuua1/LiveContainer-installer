@@ -34,9 +34,24 @@ jobs:
           mkdir -p output
           mv LcInstaller.ipa output/
 
+      - name: Extract current version changelog
+        id: changelog
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}  # e.g., "v0.1.2"
+          # Extract lines between "## vX.Y.Z" and the next "## "
+          NOTES=$(sed -n "/^## $VERSION$/,/^## /p" CHANGELOG.md | sed '1d;$d')
+          # Handle empty notes
+          if [ -z "$NOTES" ]; then
+            NOTES="No release notes provided."
+          fi
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: output/LcInstaller.ipa
+          body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
