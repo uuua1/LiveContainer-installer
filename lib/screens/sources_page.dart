@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:lcinstaller/screens/add_source_page.dart';
 import 'package:lcinstaller/models/source.dart';
 import 'package:lcinstaller/database_helper.dart';
@@ -119,8 +120,9 @@ class _SourcesPageState extends State<SourcesPage> {
                         website: data['website'],
                       );
 
-                      final sourceId = await DatabaseHelper()
-                          .insertSource(newSource.toMap());
+                      final sourceId = await DatabaseHelper().insertSource(
+                        newSource.toMap(),
+                      );
 
                       int skippedApps = 0;
                       if (data['apps'] != null && data['apps'] is List) {
@@ -158,8 +160,7 @@ class _SourcesPageState extends State<SourcesPage> {
                               size: appData['size'],
                             );
 
-                            await DatabaseHelper()
-                                .insertApp(app.toMap());
+                            await DatabaseHelper().insertApp(app.toMap());
                           } catch (e) {
                             skippedApps++;
                             debugPrint("Skipping app due to error: $e");
@@ -297,32 +298,85 @@ class _SourcesPageState extends State<SourcesPage> {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      child: CupertinoListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            source.iconURL,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
+                      child: GestureDetector(
+                        onLongPress: () {
+                          showCupertinoModalPopup(
+                            context: context,
+                            builder: (context) => CupertinoActionSheet(
+                              title: Text(source.name),
+                              message: Text('Choose an action'),
+                              actions: [
+                                CupertinoActionSheetAction(
+                                  isDestructiveAction: true,
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await DatabaseHelper().deleteSourceAndApps(
+                                      source.id!,
+                                    );
+                                    fetchSources();
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                                CupertinoActionSheetAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Clipboard.setData(
+                                      ClipboardData(text: source.sourceURL),
+                                    );
+                                    showCupertinoDialog(
+                                      context: context,
+                                      builder: (dialogContext) => CupertinoAlertDialog(
+                                        title: const Text('Copied'),
+                                        content: const Text(
+                                          'Source URL copied to clipboard.',
+                                        ),
+                                        actions: [
+                                          CupertinoDialogAction(
+                                            child: const Text('OK'),
+                                            onPressed: () =>
+                                                Navigator.pop(dialogContext),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Copy URL'),
+                                ),
+                              ],
+                              cancelButton: CupertinoActionSheetAction(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                          );
+                        },
+                        child: CupertinoListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              source.iconURL,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                        title: Text(source.name),
-                        subtitle: Text(
-                          source.sourceURL,
-                          style: const TextStyle(
-                            fontSize: 13,
+                          title: Text(source.name),
+                          subtitle: Text(
+                            source.sourceURL,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.systemGrey,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            CupertinoIcons.chevron_forward,
                             color: CupertinoColors.systemGrey,
                           ),
-                        ),
-                        trailing: const Icon(
-                          CupertinoIcons.chevron_forward,
-                          color: CupertinoColors.systemGrey,
-                        ),
-                        onTap: () => Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => AppsPage(source: source),
+                          onTap: () => Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => AppsPage(source: source),
+                            ),
                           ),
                         ),
                       ),

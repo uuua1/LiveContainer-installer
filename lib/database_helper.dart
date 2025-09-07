@@ -69,12 +69,7 @@ class DatabaseHelper {
     final db = await database;
     return await db.insert('sources', source);
   }
-
-  Future<int> deleteSource(int id) async {
-    final db = await database;
-    return await db.delete('sources', where: 'id = ?', whereArgs: [id]);
-  }
-
+  
   Future<int> insertApp(Map<String, dynamic> app) async {
     final db = await database;
     return await db.insert('apps', app);
