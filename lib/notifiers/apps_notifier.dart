@@ -18,7 +18,6 @@ class AppsNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Call this after a source is added
   Future<void> refreshApps() async {
     await fetchApps();
   }

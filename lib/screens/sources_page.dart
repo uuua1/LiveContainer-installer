@@ -29,9 +29,7 @@ class _SourcesPageState extends State<SourcesPage> {
   }
 
   Future<void> fetchSources() async {
-    final dbSources = await DatabaseHelper().database.then(
-      (db) => db.query('sources'),
-    );
+    final dbSources = await DatabaseHelper().getSources();
     setState(() {
       sources = dbSources.map((e) => Source.fromMap(e)).toList();
       isLoading = false;
@@ -96,7 +94,6 @@ class _SourcesPageState extends State<SourcesPage> {
                     if (response.statusCode == 200) {
                       final data = json.decode(response.body);
 
-                      // 🔍 Required fields for a Source
                       final requiredSourceFields = [
                         'name',
                         'identifier',
@@ -122,13 +119,9 @@ class _SourcesPageState extends State<SourcesPage> {
                         website: data['website'],
                       );
 
-                      final db = await DatabaseHelper().database;
-                      final sourceId = await db.insert(
-                        'sources',
-                        newSource.toMap(),
-                      );
+                      final sourceId = await DatabaseHelper()
+                          .insertSource(newSource.toMap());
 
-                      // 🔍 Validate apps if present (lenient mode)
                       int skippedApps = 0;
                       if (data['apps'] != null && data['apps'] is List) {
                         final requiredAppFields = [
@@ -165,7 +158,8 @@ class _SourcesPageState extends State<SourcesPage> {
                               size: appData['size'],
                             );
 
-                            await db.insert('apps', app.toMap());
+                            await DatabaseHelper()
+                                .insertApp(app.toMap());
                           } catch (e) {
                             skippedApps++;
                             debugPrint("Skipping app due to error: $e");
@@ -182,7 +176,6 @@ class _SourcesPageState extends State<SourcesPage> {
                           await provider.refreshApps();
                         } catch (_) {}
 
-                        // ⚠️ Show alert if some apps were skipped
                         if (skippedApps > 0) {
                           showCupertinoDialog(
                             context: context,

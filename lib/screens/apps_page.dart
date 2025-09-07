@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lcinstaller/models/source.dart';
+import 'package:lcinstaller/utils/refetch.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,8 +98,14 @@ class _AppsPageState extends State<AppsPage> {
           });
 
         return CupertinoPageScaffold(
-          child: CustomScrollView(
-            slivers: [
+            child: CustomScrollView(
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () async {
+                    await refetchApps(context, widget.source);
+                    await appsNotifier.refreshApps();
+                  },
+                ),
               CupertinoSliverNavigationBar(
                 largeTitle: Text(
                   widget.source == null ? 'All Apps' : widget.source!.name,
