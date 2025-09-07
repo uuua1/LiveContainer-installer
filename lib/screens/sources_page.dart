@@ -97,7 +97,6 @@ class _SourcesPageState extends State<SourcesPage> {
 
                       final requiredSourceFields = [
                         'name',
-                        'identifier',
                         'subtitle',
                         'iconURL',
                         'website',
@@ -113,7 +112,7 @@ class _SourcesPageState extends State<SourcesPage> {
 
                       final newSource = Source(
                         name: data['name'],
-                        identifier: data['identifier'],
+                        identifier: data['identifier'] ?? data['website'],
                         subtitle: data['subtitle'],
                         sourceURL: url,
                         iconURL: data['iconURL'],
@@ -129,12 +128,8 @@ class _SourcesPageState extends State<SourcesPage> {
                         final requiredAppFields = [
                           'name',
                           'bundleIdentifier',
-                          'version',
-                          'versionDate',
-                          'downloadURL',
                           'localizedDescription',
                           'iconURL',
-                          'size',
                         ];
 
                         for (final appData in data['apps']) {
@@ -147,17 +142,57 @@ class _SourcesPageState extends State<SourcesPage> {
                               }
                             }
 
+                            // Handle versions field
+                            List<Versions> versionsList = [];
+                            if (appData['size'] != null &&
+                                appData['downloadURL'] != null &&
+                                appData['version'] != null &&
+                                (appData['versionDate'] != null ||
+                                    appData['date'] != null)) {
+                              // Single version info at top level
+                              versionsList.add(
+                                Versions(
+                                  version: appData['version'],
+                                  date:
+                                      appData['versionDate'] ?? appData['date'],
+                                  size: appData['size'],
+                                  downloadURL: appData['downloadURL'],
+                                  localizedDescription:
+                                      appData['localizedDescription'] ?? '',
+                                ),
+                              );
+                            } else if (appData['versions'] != null &&
+                                appData['versions'] is List) {
+                              // Multiple versions
+                              versionsList = (appData['versions'] as List)
+                                  .map(
+                                    (v) => Versions(
+                                      version: v['version'],
+                                      date: v['date'],
+                                      size: v['size'],
+                                      downloadURL: v['downloadURL'],
+                                      localizedDescription:
+                                          v['localizedDescription'] ?? '',
+                                    ),
+                                  )
+                                  .toList();
+                            }
+
                             final app = App(
                               sourceId: sourceId,
                               name: appData['name'],
                               bundleIdentifier: appData['bundleIdentifier'],
-                              version: appData['version'],
-                              versionDate: appData['versionDate'],
-                              downloadURL: appData['downloadURL'],
                               localizedDescription:
                                   appData['localizedDescription'],
                               iconURL: appData['iconURL'],
-                              size: appData['size'],
+                              developerName: appData['developerName'] ?? '',
+                              subTitle: appData['subTitle'] ?? '',
+                              screenshots:
+                                  appData['screenshots'] != null &&
+                                      appData['screenshots'] is List
+                                  ? List<String>.from(appData['screenshots'])
+                                  : [],
+                              versions: versionsList,
                             );
 
                             await DatabaseHelper().insertApp(app.toMap());
@@ -178,21 +213,23 @@ class _SourcesPageState extends State<SourcesPage> {
                         } catch (_) {}
 
                         if (skippedApps > 0) {
-                          showCupertinoDialog(
-                            context: context,
-                            builder: (_) => CupertinoAlertDialog(
-                              title: const Text('Warning'),
-                              content: Text(
-                                '$skippedApps app(s) could not be added due to missing or invalid fields.',
-                              ),
-                              actions: [
-                                CupertinoDialogAction(
-                                  child: const Text('OK'),
-                                  onPressed: () => Navigator.pop(context),
+                          if (context.mounted) {
+                            showCupertinoDialog(
+                              context: context,
+                              builder: (_) => CupertinoAlertDialog(
+                                title: const Text('Warning'),
+                                content: Text(
+                                  '$skippedApps app(s) could not be added due to missing or invalid fields.',
                                 ),
-                              ],
-                            ),
-                          );
+                                actions: [
+                                  CupertinoDialogAction(
+                                    child: const Text('OK'),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
                         }
                       }
                     } else {
@@ -325,19 +362,21 @@ class _SourcesPageState extends State<SourcesPage> {
                                     );
                                     showCupertinoDialog(
                                       context: context,
-                                      builder: (dialogContext) => CupertinoAlertDialog(
-                                        title: const Text('Copied'),
-                                        content: const Text(
-                                          'Source URL copied to clipboard.',
-                                        ),
-                                        actions: [
-                                          CupertinoDialogAction(
-                                            child: const Text('OK'),
-                                            onPressed: () =>
-                                                Navigator.pop(dialogContext),
+                                      builder: (dialogContext) =>
+                                          CupertinoAlertDialog(
+                                            title: const Text('Copied'),
+                                            content: const Text(
+                                              'Source URL copied to clipboard.',
+                                            ),
+                                            actions: [
+                                              CupertinoDialogAction(
+                                                child: const Text('OK'),
+                                                onPressed: () => Navigator.pop(
+                                                  dialogContext,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
                                     );
                                   },
                                   child: const Text('Copy URL'),

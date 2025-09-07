@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:convert';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -17,7 +18,7 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'liveapps.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(path, version: 2, onCreate: _onCreate);
   }
 
   Future _onCreate(Database db, int version) async {
@@ -30,7 +31,9 @@ class DatabaseHelper {
       subtitle TEXT,
       sourceURL TEXT,
       iconURL TEXT,
-      website TEXT
+      website TEXT,
+      description TEXT,
+      tintColor TEXT
     )
   ''');
 
@@ -40,13 +43,26 @@ class DatabaseHelper {
       source_id INTEGER,
       name TEXT,
       bundleIdentifier TEXT,
-      version TEXT,
-      versionDate TEXT,
-      downloadURL TEXT,
+      developerName TEXT,
+      subTitle TEXT,
       localizedDescription TEXT,
       iconURL TEXT,
-      size INTEGER,
+      tintColor TEXT,
+      screenshots TEXT,
       FOREIGN KEY(source_id) REFERENCES sources(id)
+    )
+  ''');
+
+    await db.execute('''
+    CREATE TABLE versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      app_id INTEGER,
+      version TEXT,
+      date TEXT,
+      size INTEGER,
+      downloadURL TEXT,
+      localizedDescription TEXT,
+      FOREIGN KEY(app_id) REFERENCES apps(id)
     )
   ''');
 
@@ -62,6 +78,8 @@ class DatabaseHelper {
       "website": "https://github.com/asrma7/LiveContainer-Installer",
       "sourceURL":
           "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/source.json",
+      "description": "Official Repo of LcInstaller",
+      "tintColor": "#3333FF",
     });
   }
 
@@ -69,10 +87,25 @@ class DatabaseHelper {
     final db = await database;
     return await db.insert('sources', source);
   }
-  
+
   Future<int> insertApp(Map<String, dynamic> app) async {
     final db = await database;
-    return await db.insert('apps', app);
+    // Convert screenshots list to JSON string if present
+    if (app.containsKey('screenshots') && app['screenshots'] is List) {
+      app['screenshots'] = jsonEncode(app['screenshots']);
+    }
+    // Insert app
+    int appId = await db.insert('apps', app);
+    // Insert versions if present
+    if (app.containsKey('versions') && app['versions'] is List) {
+      List versions = app['versions'];
+      for (var v in versions) {
+        Map<String, dynamic> versionMap = v is Map<String, dynamic> ? v : {};
+        versionMap['app_id'] = appId;
+        await db.insert('versions', versionMap);
+      }
+    }
+    return appId;
   }
 
   Future<List<Map<String, dynamic>>> getSources() async {
@@ -82,29 +115,72 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getApps() async {
     final db = await database;
-
-    // Using INNER JOIN to get iconURL from source table
+    // Get apps with source icon
     final result = await db.rawQuery('''
     SELECT a.*, s.iconURL AS sourceIconURL
     FROM apps a
     INNER JOIN sources s ON a.source_id = s.id
   ''');
-
+    // For each app, get versions and decode screenshots
+    for (var app in result) {
+      final versions = await db.query(
+        'versions',
+        where: 'app_id = ?',
+        whereArgs: [app['id']],
+      );
+      app['versions'] = versions;
+      // Decode screenshots JSON string to List<String>
+      if (app['screenshots'] != null && app['screenshots'] is String) {
+        try {
+          var decoded = jsonDecode(app['screenshots'] as String);
+          if (decoded is List) {
+            app['screenshots'] = decoded.map((e) => e.toString()).toList();
+          } else {
+            app['screenshots'] = [];
+          }
+        } catch (_) {
+          app['screenshots'] = [];
+        }
+      }
+    }
     return result;
   }
 
   Future<int> deleteAllApps() async {
     final db = await database;
+    await db.delete('versions');
     return await db.delete('apps');
   }
 
   Future<int> deleteAppsBySource(int sourceId) async {
     final db = await database;
-    return await db.delete('apps', where: 'source_id = ?', whereArgs: [sourceId]);
+    // Get app ids for this source
+    final apps = await db.query(
+      'apps',
+      where: 'source_id = ?',
+      whereArgs: [sourceId],
+    );
+    for (var app in apps) {
+      await db.delete('versions', where: 'app_id = ?', whereArgs: [app['id']]);
+    }
+    return await db.delete(
+      'apps',
+      where: 'source_id = ?',
+      whereArgs: [sourceId],
+    );
   }
 
   Future<int> deleteSourceAndApps(int sourceId) async {
     final db = await database;
+    // Get app ids for this source
+    final apps = await db.query(
+      'apps',
+      where: 'source_id = ?',
+      whereArgs: [sourceId],
+    );
+    for (var app in apps) {
+      await db.delete('versions', where: 'app_id = ?', whereArgs: [app['id']]);
+    }
     await db.delete('apps', where: 'source_id = ?', whereArgs: [sourceId]);
     return await db.delete('sources', where: 'id = ?', whereArgs: [sourceId]);
   }

@@ -6,6 +6,8 @@ class Source {
   final String sourceURL;
   final String iconURL;
   final String website;
+  final String? description;
+  final String? tintColor;
 
   Source({
     this.id,
@@ -15,6 +17,8 @@ class Source {
     required this.sourceURL,
     required this.iconURL,
     required this.website,
+    this.description,
+    this.tintColor,
   });
 
   factory Source.fromMap(Map<String, dynamic> map) {
@@ -26,6 +30,8 @@ class Source {
       sourceURL: map['sourceURL'],
       iconURL: map['iconURL'],
       website: map['website'],
+      description: map['description'],
+      tintColor: map['tintColor'],
     );
   }
 
@@ -38,6 +44,8 @@ class Source {
       'sourceURL': sourceURL,
       'iconURL': iconURL,
       'website': website,
+      'description': description,
+      'tintColor': tintColor,
     };
   }
 }
