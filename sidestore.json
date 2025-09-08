@@ -11,14 +11,14 @@
       "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
       "developerName": "Ashutosh Sharma",
       "subtitle": "App installer for LiveContainer",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "versionDate": "2025-09-08",
-      "versionDescription": "- Add functionality to import and export sources from common signers\n- Fix importing sidestore repositories",
-      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v0.1.4/LcInstaller.ipa",
+      "versionDescription": "- Fix issue with importing recommended sources",
+      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v0.1.5/LcInstaller.ipa",
       "localizedDescription": "Install apps on LiveContainer from different sources with ease!",
       "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
       "tintColor": "#307CFF",
-      "size": 8064207
+      "size": 8064425
     }
   ]
 }
