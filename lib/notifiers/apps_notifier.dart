@@ -12,8 +12,15 @@ class AppsNotifier extends ChangeNotifier {
   Future<void> fetchApps() async {
     _isLoading = true;
     notifyListeners();
-    final dbApps = await DatabaseHelper().getApps();
-    _apps = dbApps.map((e) => AppWithSourceIcon.fromMap(e)).toList();
+    try {
+      final dbApps = await DatabaseHelper().getApps();
+      _apps = dbApps.map((e) => AppWithSourceIcon.fromMap(e)).toList();
+    } catch (e) {
+      // Handle any errors that occur during fetching
+      if (kDebugMode) {
+        print('Error fetching apps: $e');
+      }
+    }
     _isLoading = false;
     notifyListeners();
   }

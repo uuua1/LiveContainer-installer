@@ -9,7 +9,7 @@ class App {
   final String localizedDescription;
   final String iconURL;
   final String tintColor;
-  final List<String> screenshots;
+  final List<Screenshots> screenshots;
 
   App({
     this.id,
@@ -42,7 +42,9 @@ class App {
       iconURL: map['iconURL'],
       tintColor: map['tintColor'] ?? '',
       screenshots: map['screenshots'] != null
-          ? List<String>.from((map['screenshots'] as List).map((x) => x))
+          ? List<Screenshots>.from(
+              (map['screenshots'] as List).map((x) => Screenshots.fromMap(x)),
+            )
           : [],
     );
   }
@@ -58,7 +60,7 @@ class App {
       'localizedDescription': localizedDescription,
       'iconURL': iconURL,
       'tintColor': tintColor,
-      'screenshots': screenshots,
+      'screenshots': screenshots.map((x) => x.toMap()).toList(),
     };
   }
 }
@@ -99,6 +101,32 @@ class Versions {
   }
 }
 
+class Screenshots {
+  final String imageURL;
+  final String height;
+  final String width;
+
+  Screenshots({required this.imageURL, this.height = '0', this.width = '0'});
+
+  factory Screenshots.fromMap(dynamic map) {
+    if (map is String) {
+      return Screenshots(imageURL: map, height: '0', width: '0');
+    } else if (map is Map<String, dynamic>) {
+      return Screenshots(
+        imageURL: map['imageURL'] ?? '',
+        height: '${map['height'] ?? 0}',
+        width: '${map['width'] ?? 0}',
+      );
+    } else {
+      return Screenshots(imageURL: '', height: '0', width: '0');
+    }
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'imageURL': imageURL, 'height': height, 'width': width};
+  }
+}
+
 class AppWithSourceIcon extends App {
   final String sourceIconURL;
 
@@ -134,7 +162,9 @@ class AppWithSourceIcon extends App {
       iconURL: map['iconURL'],
       tintColor: map['tintColor'] ?? '',
       screenshots: map['screenshots'] != null
-          ? List<String>.from((map['screenshots'] as List).map((x) => x))
+          ? List<Screenshots>.from(
+              (map['screenshots'] as List).map((x) => Screenshots.fromMap(x)),
+            )
           : [],
       sourceIconURL: map['sourceIconURL'],
     );

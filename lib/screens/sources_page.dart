@@ -60,13 +60,15 @@ class _SourcesPageState extends State<SourcesPage> {
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () async {
-                final url = await Navigator.push(
+                List<String>? urls = await Navigator.push(
                   context,
                   CupertinoSheetRoute(
                     builder: (context) => const AddSourcePage(),
                   ),
                 );
-                if (url != null && url is String && url.isNotEmpty) {
+                if (urls == null || urls.isEmpty) return;
+                for (final url in urls) {
+                  if (url.isEmpty) continue;
                   final alreadyExists = sources.any((s) => s.sourceURL == url);
                   if (alreadyExists) {
                     if (context.mounted) {
@@ -95,28 +97,24 @@ class _SourcesPageState extends State<SourcesPage> {
                     if (response.statusCode == 200) {
                       final data = json.decode(response.body);
 
-                      final requiredSourceFields = [
-                        'name',
-                        'subtitle',
-                        'iconURL',
-                        'website',
-                      ];
+                      if (data['sourceURL'] == null) {
+                        data['sourceURL'] = url;
+                      }
 
-                      for (final field in requiredSourceFields) {
-                        if (data[field] == null) {
-                          throw Exception(
-                            "Missing required source field: $field",
-                          );
-                        }
+                      if (data['name'] == null) {
+                        throw Exception("Missing required source field: name");
                       }
 
                       final newSource = Source(
                         name: data['name'],
-                        identifier: data['identifier'] ?? data['website'],
-                        subtitle: data['subtitle'],
+                        identifier: data['identifier'] ?? data['sourceURL'],
+                        subtitle: data['subtitle'] ?? '',
                         sourceURL: url,
-                        iconURL: data['iconURL'],
-                        website: data['website'],
+                        iconURL:
+                            data['iconURL'] ??
+                            data['apps']?[0]?['iconURL'] ??
+                            '',
+                        website: data['website'] ?? '',
                       );
 
                       final sourceId = await DatabaseHelper().insertSource(
@@ -178,6 +176,13 @@ class _SourcesPageState extends State<SourcesPage> {
                                   .toList();
                             }
 
+                            List<Screenshots> screenshotsList = [];
+                            if (appData['screenshots'] is List) {
+                              screenshotsList = (appData['screenshots'] as List)
+                                  .map((s) => Screenshots.fromMap(s))
+                                  .toList();
+                            }
+
                             final app = App(
                               sourceId: sourceId,
                               name: appData['name'],
@@ -187,11 +192,7 @@ class _SourcesPageState extends State<SourcesPage> {
                               iconURL: appData['iconURL'],
                               developerName: appData['developerName'] ?? '',
                               subTitle: appData['subTitle'] ?? '',
-                              screenshots:
-                                  appData['screenshots'] != null &&
-                                      appData['screenshots'] is List
-                                  ? List<String>.from(appData['screenshots'])
-                                  : [],
+                              screenshots: screenshotsList,
                               versions: versionsList,
                             );
 
@@ -350,7 +351,15 @@ class _SourcesPageState extends State<SourcesPage> {
                                     await DatabaseHelper().deleteSourceAndApps(
                                       source.id!,
                                     );
-                                    fetchSources();
+                                    if (context.mounted) {
+                                      final provider =
+                                          Provider.of<AppsNotifier>(
+                                            context,
+                                            listen: false,
+                                          );
+                                      await provider.refreshApps();
+                                      await fetchSources();
+                                    }
                                   },
                                   child: const Text('Delete'),
                                 ),

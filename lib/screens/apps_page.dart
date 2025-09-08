@@ -64,7 +64,11 @@ class _AppsPageState extends State<AppsPage> {
 
     return Consumer<AppsNotifier>(
       builder: (context, appsNotifier, child) {
-        final apps = appsNotifier.apps;
+        final apps = widget.source == null
+            ? appsNotifier.apps
+            : appsNotifier.apps
+                  .where((app) => app.sourceId == widget.source!.id)
+                  .toList();
         final isLoading = appsNotifier.isLoading;
         final filteredApps = searchQuery.isEmpty
             ? apps
