@@ -1,7 +1,11 @@
 # Changelog
 
+## v0.1.4
+- Add functionality to import and export sources from common signers
+- Fix importing sidestore repositories
+
 ## v0.1.3
-- Add feature to allow copying and deleting sources 
+- Add feature to allow copying and deleting sources
 
 ## v0.1.2
 - Add feature to allow refreshing apps on pull
