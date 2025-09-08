@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:lcinstaller/database_helper.dart';
+import 'package:lcinstaller/utils/source_decryptor.dart';
 
 class AddSourcePage extends StatefulWidget {
   const AddSourcePage({super.key});
@@ -16,17 +19,22 @@ class _AddSourcePageState extends State<AddSourcePage> {
 
   List<Map<String, String>> featuredRepos = [];
   Future<void> fetchFeaturedRepos() async {
-    final response = await http.get(Uri.parse(
-        "https://raw.githubusercontent.com/asrma7/livecontainer-installer/main/repos.json"));
+    final response = await http.get(
+      Uri.parse(
+        "https://raw.githubusercontent.com/asrma7/livecontainer-installer/main/repos.json",
+      ),
+    );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       setState(() {
         featuredRepos = data
-            .map((repo) => {
-                  "name": repo["name"] as String,
-                  "sourceURL": repo["sourceURL"] as String,
-                  "iconUrl": repo["iconUrl"] as String,
-                })
+            .map(
+              (repo) => {
+                "name": repo["name"] as String,
+                "sourceURL": repo["sourceURL"] as String,
+                "iconUrl": repo["iconUrl"] as String,
+              },
+            )
             .toList();
         isLoading = false;
       });
@@ -54,9 +62,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
           ),
           border: null,
         ),
-        child: Center(
-          child: CupertinoActivityIndicator(),
-        ),
+        child: Center(child: CupertinoActivityIndicator()),
       );
     }
     return CupertinoPageScaffold(
@@ -71,7 +77,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
             // Save logic for manual source
             final url = _urlController.text.trim();
             if (url.isNotEmpty) {
-              Navigator.pop(context, url);
+              Navigator.pop(context, [url]);
             } else {
               Navigator.pop(context);
             }
@@ -114,8 +120,22 @@ class _AddSourcePageState extends State<AddSourcePage> {
                   child: CupertinoButton(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     borderRadius: BorderRadius.circular(12),
-                    onPressed: () {
-                      // Import logic
+                    onPressed: () async {
+                      final clipboardData = await Clipboard.getData(
+                        'text/plain',
+                      );
+                      if (clipboardData == null || clipboardData.text == null) {
+                        return;
+                      }
+                      final sources = ASDeobfuscator(
+                        clipboardData.text!,
+                      ).decode();
+                      if (sources.isNotEmpty) {
+                        if (context.mounted) {
+                          Navigator.pop(context, sources);
+                        }
+                        return;
+                      }
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -132,8 +152,14 @@ class _AddSourcePageState extends State<AddSourcePage> {
                   child: CupertinoButton(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     borderRadius: BorderRadius.circular(12),
-                    onPressed: () {
-                      // Export logic
+                    onPressed: () async {
+                      final sources = await DatabaseHelper().getSources();
+                      final sourceUrls = sources
+                          .map((s) => s['sourceURL'] as String)
+                          .toList();
+                      Clipboard.setData(
+                        ClipboardData(text: sourceUrls.join('\n')),
+                      );
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -186,7 +212,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
                     ),
                     borderRadius: BorderRadius.circular(20),
                     onPressed: () {
-                      Navigator.pop(context, repo["sourceURL"]);
+                      Navigator.pop(context, [repo["sourceURL"]]);
                     },
                     child: const Text("Add"),
                   ),

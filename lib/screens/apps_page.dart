@@ -51,7 +51,7 @@ class _AppsPageState extends State<AppsPage> {
     final uri = Uri.parse(
       "livecontainer://install?url=${Uri.encodeComponent(ipaUrl)}",
     );
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -64,21 +64,25 @@ class _AppsPageState extends State<AppsPage> {
 
     return Consumer<AppsNotifier>(
       builder: (context, appsNotifier, child) {
-        final apps = appsNotifier.apps;
+        final apps = widget.source == null
+            ? appsNotifier.apps
+            : appsNotifier.apps
+                  .where((app) => app.sourceId == widget.source!.id)
+                  .toList();
         final isLoading = appsNotifier.isLoading;
         final filteredApps = searchQuery.isEmpty
             ? apps
             : apps
-                .where(
-                  (app) =>
-                      app.name.toLowerCase().contains(
-                        searchQuery.toLowerCase(),
-                      ) ||
-                      app.localizedDescription.toLowerCase().contains(
-                        searchQuery.toLowerCase(),
-                      ),
-                )
-                .toList();
+                  .where(
+                    (app) =>
+                        app.name.toLowerCase().contains(
+                          searchQuery.toLowerCase(),
+                        ) ||
+                        app.localizedDescription.toLowerCase().contains(
+                          searchQuery.toLowerCase(),
+                        ),
+                  )
+                  .toList();
 
         final sortedApps = filteredApps
           ..sort((a, b) {
@@ -89,7 +93,9 @@ class _AppsPageState extends State<AppsPage> {
                 break;
               case "date":
               case "default":
-                comparison = a.versionDate.compareTo(b.versionDate);
+                comparison = a.latestVersion.date.compareTo(
+                  b.latestVersion.date,
+                );
                 break;
               default:
                 comparison = 0;
@@ -98,14 +104,14 @@ class _AppsPageState extends State<AppsPage> {
           });
 
         return CupertinoPageScaffold(
-            child: CustomScrollView(
-              slivers: [
-                CupertinoSliverRefreshControl(
-                  onRefresh: () async {
-                    await refetchApps(context, widget.source);
-                    await appsNotifier.refreshApps();
-                  },
-                ),
+          child: CustomScrollView(
+            slivers: [
+              CupertinoSliverRefreshControl(
+                onRefresh: () async {
+                  await refetchApps(context, widget.source);
+                  await appsNotifier.refreshApps();
+                },
+              ),
               CupertinoSliverNavigationBar(
                 largeTitle: Text(
                   widget.source == null ? 'All Apps' : widget.source!.name,
@@ -201,7 +207,7 @@ class _AppsPageState extends State<AppsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Version: ${app.version}",
+                                  "Version: ${app.latestVersion.version}",
                                   style: const TextStyle(
                                     fontSize: 13,
                                     color: CupertinoColors.systemGrey,
@@ -219,7 +225,7 @@ class _AppsPageState extends State<AppsPage> {
                             trailing: CupertinoButton(
                               padding: EdgeInsets.zero,
                               onPressed: () => _installInLiveContainer(
-                                app.downloadURL,
+                                app.latestVersion.downloadURL,
                               ),
                               child: Icon(
                                 Ionicons.download_outline,
