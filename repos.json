@@ -1,13 +1,17 @@
 [
-    {
-      "iconUrl": "https://repo.cypwn.xyz/assets/images/cypwn_small.png",
-      "name": "CyPwn IPA Library",
-      "sourceURL": "https://ipa.cypwn.xyz/cypwn.json"
-    },
-    {
-      "iconUrl":
-          "https://apptesters.org/wp-content/uploads/2024/04/AppTesters-Logo-Site-Icon.webp",
-      "name": "AppTesters IPA Repo",
-      "sourceURL": "https://repository.apptesters.org/"
-    }
+  {
+    "iconUrl": "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/screenshots/100.png",
+    "name": "Official LcInstaller Repo",
+    "sourceURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/sidestore.json"
+  },
+  {
+    "iconUrl": "https://sidestore.io/assets/icon.png",
+    "name": "SideStore Team Picks",
+    "sourceURL": "https://community-apps.sidestore.io/sidecommunity.json"
+  },
+  {
+    "iconUrl": "https://raw.githubusercontent.com/dayanch96/YTLite/refs/heads/main/Resources/icon.png",
+    "name": "Dan's Workshop",
+    "sourceURL": "https://raw.githubusercontent.com/dvntm0/AltStore/refs/heads/main/repo.json"
+  }
 ]
