@@ -80,7 +80,7 @@ def update_sidestore_file(json_file, latest_release):
             "subtitle": "LiveContainer Installer Repo to install or update LcInstaller",
             "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
             "website": "https://github.com/asrma7/LiveContainer-Installer",
-            "sourceURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/source.json",
+            "sourceURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/sidestore.json",
             "apps": []
         }
 
