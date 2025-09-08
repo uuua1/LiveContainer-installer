@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.5
+- Fix issue with importing recommended sources
+
 ## v0.1.4
 - Add functionality to import and export sources from common signers
 - Fix importing sidestore repositories

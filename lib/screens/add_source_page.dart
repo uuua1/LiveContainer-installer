@@ -212,7 +212,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
                     ),
                     borderRadius: BorderRadius.circular(20),
                     onPressed: () {
-                      Navigator.pop(context, [repo["sourceURL"]]);
+                      Navigator.pop(context, [repo["sourceURL"]!]);
                     },
                     child: const Text("Add"),
                   ),

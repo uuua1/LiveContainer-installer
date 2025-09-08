@@ -86,7 +86,7 @@ class DatabaseHelper {
           "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
       "website": "https://github.com/asrma7/LiveContainer-Installer",
       "sourceURL":
-          "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/source.json",
+          "https://raw.githubusercontent.com/asrma7/LiveContainer-Installer/main/sidestore.json",
       "description": "Official Repo of LcInstaller",
       "tintColor": "#3333FF",
     });
