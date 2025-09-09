@@ -1,3 +1,5 @@
+import 'package:lcinstaller/models/source.dart';
+
 class App {
   final int sourceId;
   final String name;
@@ -123,25 +125,25 @@ class Screenshots {
   }
 }
 
-class AppWithSourceIcon extends App {
-  final String sourceIconURL;
+class AppWithSource extends App {
+  final Source source;
 
-  AppWithSourceIcon({
+  AppWithSource({
     required super.sourceId,
     required super.name,
     required super.bundleIdentifier,
     required super.versions,
     required super.localizedDescription,
     required super.iconURL,
-    required this.sourceIconURL,
+    required this.source,
     super.developerName,
     super.subTitle,
     super.tintColor,
     super.screenshots,
   });
 
-  factory AppWithSourceIcon.fromMap(Map<String, dynamic> map) {
-    return AppWithSourceIcon(
+  factory AppWithSource.fromMap(Map<String, dynamic> map) {
+    return AppWithSource(
       sourceId: map['source_id'],
       name: map['name'],
       bundleIdentifier: map['bundleIdentifier'],
@@ -160,7 +162,7 @@ class AppWithSourceIcon extends App {
               (map['screenshots'] as List).map((x) => Screenshots.fromMap(x)),
             )
           : [],
-      sourceIconURL: map['sourceIconURL'],
+      source: Source.fromMap(map['source']),
     );
   }
 

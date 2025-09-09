@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AppsNotifier extends ChangeNotifier {
-  List<AppWithSourceIcon> _apps = [];
+  List<AppWithSource> _apps = [];
   bool _isLoading = false;
 
-  List<AppWithSourceIcon> get apps => _apps;
+  List<AppWithSource> get apps => _apps;
   bool get isLoading => _isLoading;
 
   Future<void> fetchApps() async {
@@ -19,7 +19,7 @@ class AppsNotifier extends ChangeNotifier {
       final sources = await DatabaseHelper().getSources();
       final sourceObjects = sources.map((e) => Source.fromMap(e)).toList();
 
-      List<AppWithSourceIcon> allApps = [];
+      List<AppWithSource> allApps = [];
 
       for (final source in sourceObjects) {
         final sourceApps = await _fetchAppsFromSource(source);
@@ -36,7 +36,7 @@ class AppsNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<AppWithSourceIcon>> _fetchAppsFromSource(Source source) async {
+  Future<List<AppWithSource>> _fetchAppsFromSource(Source source) async {
     try {
       final response = await http.get(Uri.parse(source.sourceURL));
       if (response.statusCode == 200) {
@@ -56,29 +56,11 @@ class AppsNotifier extends ChangeNotifier {
     return [];
   }
 
-  AppWithSourceIcon _parseAppFromData(
-    Map<String, dynamic> appData,
-    Source source,
-  ) {
-    List<Versions> versions = [];
+  AppWithSource _parseAppFromData(Map<String, dynamic> appData, Source source) {
+    final List<Versions> versions = [];
 
-    // Handle version data
-    if (appData['version'] != null) {
-      versions.add(
-        Versions(
-          version: appData['version'],
-          date: appData['versionDate'] ?? '',
-          size: appData['size'] ?? 0,
-          downloadURL: appData['downloadURL'] ?? '',
-          localizedDescription:
-              appData['versionDescription'] ??
-              appData['localizedDescription'] ??
-              '',
-        ),
-      );
-    }
-
-    if (appData['versions'] is List) {
+    if (appData['versions'] is List &&
+        (appData['versions'] as List).isNotEmpty) {
       for (var v in appData['versions']) {
         if (v is Map<String, dynamic>) {
           versions.add(
@@ -92,16 +74,40 @@ class AppsNotifier extends ChangeNotifier {
           );
         }
       }
+    } else if (appData['version'] != null) {
+      versions.add(
+        Versions(
+          version: appData['version'] ?? '',
+          date: appData['versionDate'] ?? '',
+          size: appData['size'] ?? 0,
+          downloadURL: appData['downloadURL'] ?? '',
+          localizedDescription:
+              appData['versionDescription'] ??
+              appData['localizedDescription'] ??
+              '',
+        ),
+      );
     }
 
     List<Screenshots> screenshots = [];
-    if (appData['screenshots'] is List) {
-      screenshots = (appData['screenshots'] as List)
-          .map((s) => Screenshots.fromMap(s))
-          .toList();
+    final appScreenshots = appData['screenshots'] ?? appData['screenshotURLs'];
+    if (appScreenshots is List) {
+      screenshots = (appScreenshots).map((s) {
+        if (s is String) {
+          return Screenshots.fromMap({
+            'imageURL': s,
+            'height': '0',
+            'width': '0',
+          });
+        } else if (s is Map<String, dynamic>) {
+          return Screenshots.fromMap(s);
+        } else {
+          return Screenshots(imageURL: '', height: '0', width: '0');
+        }
+      }).toList();
     }
 
-    return AppWithSourceIcon(
+    return AppWithSource(
       sourceId: source.id!,
       name: appData['name'] ?? '',
       bundleIdentifier: appData['bundleIdentifier'] ?? '',
@@ -112,7 +118,7 @@ class AppsNotifier extends ChangeNotifier {
       iconURL: appData['iconURL'] ?? '',
       tintColor: appData['tintColor'] ?? '',
       screenshots: screenshots,
-      sourceIconURL: source.iconURL,
+      source: source,
     );
   }
 

@@ -49,9 +49,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Card(
-                    color: CupertinoColors.systemBackground.resolveFrom(
-                      context,
-                    ),
+                    color: CupertinoColors.secondarySystemBackground
+                        .resolveFrom(context),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

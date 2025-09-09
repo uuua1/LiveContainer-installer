@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lcinstaller/models/source.dart';
+import 'package:lcinstaller/screens/app_view_page.dart';
+import 'package:lcinstaller/utils/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AppsPage extends StatefulWidget {
   final Source? source;
@@ -44,13 +45,6 @@ class _AppsPageState extends State<AppsPage> {
       this.sortType = sortType;
       this.sortAscending = sortAscending;
     });
-  }
-
-  Future<void> _installInLiveContainer(String ipaUrl) async {
-    final uri = Uri.parse(
-      "livecontainer://install?url=${Uri.encodeComponent(ipaUrl)}",
-    );
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -177,6 +171,14 @@ class _AppsPageState extends State<AppsPage> {
                               vertical: 8,
                             ),
                             child: CupertinoListTile(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => AppViewPage(app: app),
+                                  ),
+                                );
+                              },
                               leading: Stack(
                                 children: [
                                   Image.network(
@@ -195,7 +197,7 @@ class _AppsPageState extends State<AppsPage> {
                                         borderRadius: BorderRadius.circular(34),
                                       ),
                                       child: Image.network(
-                                        app.sourceIconURL,
+                                        app.source.iconURL,
                                         width: 14,
                                         height: 14,
                                         fit: BoxFit.cover,
@@ -226,7 +228,7 @@ class _AppsPageState extends State<AppsPage> {
                               ),
                               trailing: CupertinoButton(
                                 padding: EdgeInsets.zero,
-                                onPressed: () => _installInLiveContainer(
+                                onPressed: () => installInLiveContainer(
                                   app.latestVersion.downloadURL,
                                 ),
                                 child: Icon(
