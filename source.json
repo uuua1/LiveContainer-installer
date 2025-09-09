@@ -71,6 +71,17 @@
       "localizedDescription": "Update of LiveContainer just got released!",
       "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
       "size": 8056715
+    },
+    {
+      "name": "LcInstaller",
+      "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
+      "developerName": "Ashutosh Sharma",
+      "version": "1.0.0",
+      "versionDate": "2025-09-09T09:02:06Z",
+      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v1.0.0/LcInstaller.ipa",
+      "localizedDescription": "Update of LiveContainer just got released!",
+      "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
+      "size": 8076298
     }
   ]
 }

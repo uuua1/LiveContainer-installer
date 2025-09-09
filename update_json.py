@@ -45,7 +45,7 @@ def update_json_file(json_file, latest_release):
         "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
         "developerName": "Ashutosh Sharma",
         "version": re.search(r"(\d+\.\d+\.\d+)", latest_release["tag_name"] or "1.0.0").group(1),
-        "versionDate": datetime.strptime(latest_release["published_at"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d"),
+        "versionDate": datetime.strptime(latest_release["published_at"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%dT%H:%M:%SZ"),
         "downloadURL": next((asset["browser_download_url"] for asset in latest_release.get("assets", []) if asset["name"].endswith(".ipa")), ""),
         "localizedDescription": f"Update of LiveContainer just got released!",
         "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
@@ -84,22 +84,62 @@ def update_sidestore_file(json_file, latest_release):
             "apps": []
         }
 
-    app_entry = {
-        "name": "LcInstaller",
-        "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
-        "developerName": "Ashutosh Sharma",
-        "subtitle": "App installer for LiveContainer",
-        "version": re.search(r"(\d+\.\d+\.\d+)", latest_release["tag_name"] or "1.0.0").group(1),
-        "versionDate": datetime.strptime(latest_release["published_at"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d"),
-        "versionDescription": prepare_description(latest_release.get("body", "No description provided.")),
-        "downloadURL": next((asset["browser_download_url"] for asset in latest_release.get("assets", []) if asset["name"].endswith(".ipa")), ""),
-        "localizedDescription": f"Install apps on LiveContainer from different sources with ease!",
-        "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
-        "tintColor": "#307CFF",
-        "size": next((asset["size"] for asset in latest_release.get("assets", []) if asset["name"].endswith(".ipa")), 0)
+    # Extract latest release info
+    version_str = re.search(r"(\d+\.\d+\.\d+)", latest_release["tag_name"] or "1.0.0").group(1)
+    version_date = datetime.strptime(latest_release["published_at"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%dT%H:%M:%SZ")
+    download_url = next((asset["browser_download_url"] for asset in latest_release.get("assets", []) if asset["name"].endswith(".ipa")), "")
+    size_val = next((asset["size"] for asset in latest_release.get("assets", []) if asset["name"].endswith(".ipa")), 0)
+
+    # Prepare version entry
+    version_entry = {
+        "version": version_str,
+        "date": version_date,
+        "downloadURL": download_url,
+        "localizedDescription": prepare_description(latest_release.get("body", "No description provided.")),
+        "size": size_val
     }
 
-    data["apps"] = [app_entry]  # Sidestore only keeps the latest version
+    # Check if app already exists in sidestore.json
+    existing_app = next((a for a in data["apps"] if a["bundleIdentifier"] == "site.ashutoshportfolio.lcinstaller"), None)
+
+    if existing_app:
+        # Update top-level fields
+        existing_app.update({
+            "version": version_str,
+            "versionDate": version_date,
+            "versionDescription": prepare_description(latest_release.get("body", "No description provided.")),
+            "downloadURL": download_url,
+            "localizedDescription": "Install apps on LiveContainer from different sources with ease!",
+            "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
+            "tintColor": "#307CFF",
+            "size": size_val
+        })
+
+        # Ensure versions list exists
+        if "versions" not in existing_app:
+            existing_app["versions"] = []
+
+        # Avoid duplicate entries for same version
+        if not any(v["version"] == version_str for v in existing_app["versions"]):
+            existing_app["versions"].insert(0, version_entry)  # insert newest first
+    else:
+        # Create new app entry
+        app_entry = {
+            "name": "LcInstaller",
+            "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
+            "developerName": "Ashutosh Sharma",
+            "subtitle": "App installer for LiveContainer",
+            "version": version_str,
+            "versionDate": version_date,
+            "versionDescription": prepare_description(latest_release.get("body", "No description provided.")),
+            "downloadURL": download_url,
+            "localizedDescription": "Install apps on LiveContainer from different sources with ease!",
+            "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
+            "tintColor": "#307CFF",
+            "size": size_val,
+            "versions": [version_entry]
+        }
+        data["apps"].append(app_entry)
 
 
     # Save
