@@ -36,20 +36,22 @@ class _SettingsPageState extends State<SettingsPage> {
     return CupertinoPageScaffold(
       child: CustomScrollView(
         slivers: [
-          const CupertinoSliverNavigationBar(
-            largeTitle: Text('Settings'),
-          ),
+          const CupertinoSliverNavigationBar(largeTitle: Text('Settings')),
           SliverFillRemaining(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 20.0,
+              padding: const EdgeInsets.fromLTRB(
+                16.0,
+                20.0,
+                16.0,
+                kBottomNavigationBarHeight + 20.0,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Card(
-                    color: CupertinoColors.systemBackground.resolveFrom(context),
+                    color: CupertinoColors.systemBackground.resolveFrom(
+                      context,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

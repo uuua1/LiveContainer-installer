@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lcinstaller/models/source.dart';
-import 'package:lcinstaller/utils/refetch.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,7 +107,6 @@ class _AppsPageState extends State<AppsPage> {
             slivers: [
               CupertinoSliverRefreshControl(
                 onRefresh: () async {
-                  await refetchApps(context, widget.source);
                   await appsNotifier.refreshApps();
                 },
               ),
@@ -166,76 +164,81 @@ class _AppsPageState extends State<AppsPage> {
                   ? const SliverFillRemaining(
                       child: Center(child: CupertinoActivityIndicator()),
                     )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final app = sortedApps[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: CupertinoListTile(
-                            leading: Stack(
-                              children: [
-                                Image.network(
-                                  app.iconURL,
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: CupertinoColors.systemBackground
-                                          .withAlpha(200),
-                                      borderRadius: BorderRadius.circular(34),
+                  : SliverPadding(
+                      padding: const EdgeInsets.only(
+                        bottom: kBottomNavigationBarHeight + 20.0,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final app = sortedApps[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: CupertinoListTile(
+                              leading: Stack(
+                                children: [
+                                  Image.network(
+                                    app.iconURL,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: CupertinoColors.systemBackground
+                                            .withAlpha(200),
+                                        borderRadius: BorderRadius.circular(34),
+                                      ),
+                                      child: Image.network(
+                                        app.sourceIconURL,
+                                        width: 14,
+                                        height: 14,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child: Image.network(
-                                      app.sourceIconURL,
-                                      width: 14,
-                                      height: 14,
-                                      fit: BoxFit.cover,
+                                  ),
+                                ],
+                              ),
+                              title: Text(app.name),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Version: ${app.latestVersion.version}",
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: CupertinoColors.systemGrey,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            title: Text(app.name),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Version: ${app.latestVersion.version}",
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: CupertinoColors.systemGrey,
+                                  Text(
+                                    app.localizedDescription,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: CupertinoColors.systemGrey,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  app.localizedDescription,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: CupertinoColors.systemGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            trailing: CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () => _installInLiveContainer(
-                                app.latestVersion.downloadURL,
+                                ],
                               ),
-                              child: Icon(
-                                Ionicons.download_outline,
-                                size: 24,
-                                color: CupertinoColors.activeBlue,
+                              trailing: CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                onPressed: () => _installInLiveContainer(
+                                  app.latestVersion.downloadURL,
+                                ),
+                                child: Icon(
+                                  Ionicons.download_outline,
+                                  size: 24,
+                                  color: CupertinoColors.activeBlue,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }, childCount: sortedApps.length),
+                          );
+                        }, childCount: sortedApps.length),
+                      ),
                     ),
             ],
           ),

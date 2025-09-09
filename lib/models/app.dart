@@ -1,5 +1,4 @@
 class App {
-  final int? id;
   final int sourceId;
   final String name;
   final String bundleIdentifier;
@@ -12,7 +11,6 @@ class App {
   final List<Screenshots> screenshots;
 
   App({
-    this.id,
     required this.sourceId,
     required this.name,
     required this.bundleIdentifier,
@@ -27,7 +25,6 @@ class App {
 
   factory App.fromMap(Map<String, dynamic> map) {
     return App(
-      id: map['id'],
       sourceId: map['source_id'],
       name: map['name'],
       bundleIdentifier: map['bundleIdentifier'],
@@ -50,7 +47,6 @@ class App {
   }
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'source_id': sourceId,
       'name': name,
       'bundleIdentifier': bundleIdentifier,
@@ -131,7 +127,6 @@ class AppWithSourceIcon extends App {
   final String sourceIconURL;
 
   AppWithSourceIcon({
-    super.id,
     required super.sourceId,
     required super.name,
     required super.bundleIdentifier,
@@ -147,7 +142,6 @@ class AppWithSourceIcon extends App {
 
   factory AppWithSourceIcon.fromMap(Map<String, dynamic> map) {
     return AppWithSourceIcon(
-      id: map['id'],
       sourceId: map['source_id'],
       name: map['name'],
       bundleIdentifier: map['bundleIdentifier'],

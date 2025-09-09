@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lcinstaller/screens/add_source_page.dart';
 import 'package:lcinstaller/models/source.dart';
@@ -6,7 +7,6 @@ import 'package:lcinstaller/database_helper.dart';
 import 'package:lcinstaller/screens/apps_page.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
-import 'package:lcinstaller/models/app.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -117,92 +117,10 @@ class _SourcesPageState extends State<SourcesPage> {
                         website: data['website'] ?? '',
                       );
 
-                      final sourceId = await DatabaseHelper().insertSource(
-                        newSource.toMap(),
-                      );
+                      await DatabaseHelper().insertSource(newSource.toMap());
 
-                      int skippedApps = 0;
-                      if (data['apps'] != null && data['apps'] is List) {
-                        final requiredAppFields = [
-                          'name',
-                          'bundleIdentifier',
-                          'localizedDescription',
-                          'iconURL',
-                        ];
-
-                        for (final appData in data['apps']) {
-                          try {
-                            for (final field in requiredAppFields) {
-                              if (appData[field] == null) {
-                                throw Exception(
-                                  "Missing required app field: $field",
-                                );
-                              }
-                            }
-
-                            // Handle versions field
-                            List<Versions> versionsList = [];
-                            if (appData['size'] != null &&
-                                appData['downloadURL'] != null &&
-                                appData['version'] != null &&
-                                (appData['versionDate'] != null ||
-                                    appData['date'] != null)) {
-                              // Single version info at top level
-                              versionsList.add(
-                                Versions(
-                                  version: appData['version'],
-                                  date:
-                                      appData['versionDate'] ?? appData['date'],
-                                  size: appData['size'],
-                                  downloadURL: appData['downloadURL'],
-                                  localizedDescription:
-                                      appData['localizedDescription'] ?? '',
-                                ),
-                              );
-                            } else if (appData['versions'] != null &&
-                                appData['versions'] is List) {
-                              // Multiple versions
-                              versionsList = (appData['versions'] as List)
-                                  .map(
-                                    (v) => Versions(
-                                      version: v['version'],
-                                      date: v['date'],
-                                      size: v['size'],
-                                      downloadURL: v['downloadURL'],
-                                      localizedDescription:
-                                          v['localizedDescription'] ?? '',
-                                    ),
-                                  )
-                                  .toList();
-                            }
-
-                            List<Screenshots> screenshotsList = [];
-                            if (appData['screenshots'] is List) {
-                              screenshotsList = (appData['screenshots'] as List)
-                                  .map((s) => Screenshots.fromMap(s))
-                                  .toList();
-                            }
-
-                            final app = App(
-                              sourceId: sourceId,
-                              name: appData['name'],
-                              bundleIdentifier: appData['bundleIdentifier'],
-                              localizedDescription:
-                                  appData['localizedDescription'],
-                              iconURL: appData['iconURL'],
-                              developerName: appData['developerName'] ?? '',
-                              subTitle: appData['subTitle'] ?? '',
-                              screenshots: screenshotsList,
-                              versions: versionsList,
-                            );
-
-                            await DatabaseHelper().insertApp(app.toMap());
-                          } catch (e) {
-                            skippedApps++;
-                            debugPrint("Skipping app due to error: $e");
-                          }
-                        }
-                      }
+                      // Note: Apps are no longer stored in database
+                      // They will be fetched fresh from sources when needed
 
                       if (context.mounted) {
                         try {
@@ -212,26 +130,6 @@ class _SourcesPageState extends State<SourcesPage> {
                           );
                           await provider.refreshApps();
                         } catch (_) {}
-
-                        if (skippedApps > 0) {
-                          if (context.mounted) {
-                            showCupertinoDialog(
-                              context: context,
-                              builder: (_) => CupertinoAlertDialog(
-                                title: const Text('Warning'),
-                                content: Text(
-                                  '$skippedApps app(s) could not be added due to missing or invalid fields.',
-                                ),
-                                actions: [
-                                  CupertinoDialogAction(
-                                    child: const Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        }
                       }
                     } else {
                       if (context.mounted) {
@@ -328,108 +226,113 @@ class _SourcesPageState extends State<SourcesPage> {
               ? const SliverFillRemaining(
                   child: Center(child: CupertinoActivityIndicator()),
                 )
-              : SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final source = filteredSources[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: GestureDetector(
-                        onLongPress: () {
-                          showCupertinoModalPopup(
-                            context: context,
-                            builder: (context) => CupertinoActionSheet(
-                              title: Text(source.name),
-                              message: Text('Choose an action'),
-                              actions: [
-                                CupertinoActionSheetAction(
-                                  isDestructiveAction: true,
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    await DatabaseHelper().deleteSourceAndApps(
-                                      source.id!,
-                                    );
-                                    if (context.mounted) {
-                                      final provider =
-                                          Provider.of<AppsNotifier>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      await provider.refreshApps();
-                                      await fetchSources();
-                                    }
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                                CupertinoActionSheetAction(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Clipboard.setData(
-                                      ClipboardData(text: source.sourceURL),
-                                    );
-                                    showCupertinoDialog(
-                                      context: context,
-                                      builder: (dialogContext) =>
-                                          CupertinoAlertDialog(
-                                            title: const Text('Copied'),
-                                            content: const Text(
-                                              'Source URL copied to clipboard.',
-                                            ),
-                                            actions: [
-                                              CupertinoDialogAction(
-                                                child: const Text('OK'),
-                                                onPressed: () => Navigator.pop(
-                                                  dialogContext,
-                                                ),
+              : SliverPadding(
+                  padding: const EdgeInsets.only(
+                    bottom: kBottomNavigationBarHeight + 20.0,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final source = filteredSources[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: GestureDetector(
+                          onLongPress: () {
+                            showCupertinoModalPopup(
+                              context: context,
+                              builder: (context) => CupertinoActionSheet(
+                                title: Text(source.name),
+                                message: Text('Choose an action'),
+                                actions: [
+                                  CupertinoActionSheetAction(
+                                    isDestructiveAction: true,
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await DatabaseHelper()
+                                          .deleteSourceAndApps(source.id!);
+                                      if (context.mounted) {
+                                        final provider =
+                                            Provider.of<AppsNotifier>(
+                                              context,
+                                              listen: false,
+                                            );
+                                        await provider.refreshApps();
+                                        await fetchSources();
+                                      }
+                                    },
+                                    child: const Text('Delete'),
+                                  ),
+                                  CupertinoActionSheetAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      Clipboard.setData(
+                                        ClipboardData(text: source.sourceURL),
+                                      );
+                                      showCupertinoDialog(
+                                        context: context,
+                                        builder: (dialogContext) =>
+                                            CupertinoAlertDialog(
+                                              title: const Text('Copied'),
+                                              content: const Text(
+                                                'Source URL copied to clipboard.',
                                               ),
-                                            ],
-                                          ),
-                                    );
-                                  },
-                                  child: const Text('Copy URL'),
+                                              actions: [
+                                                CupertinoDialogAction(
+                                                  child: const Text('OK'),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                        dialogContext,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                      );
+                                    },
+                                    child: const Text('Copy URL'),
+                                  ),
+                                ],
+                                cancelButton: CupertinoActionSheetAction(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text('Cancel'),
                                 ),
-                              ],
-                              cancelButton: CupertinoActionSheetAction(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Cancel'),
+                              ),
+                            );
+                          },
+                          child: CupertinoListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                source.iconURL,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                          );
-                        },
-                        child: CupertinoListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              source.iconURL,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
+                            title: Text(source.name),
+                            subtitle: Text(
+                              source.sourceURL,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: CupertinoColors.systemGrey,
+                              ),
                             ),
-                          ),
-                          title: Text(source.name),
-                          subtitle: Text(
-                            source.sourceURL,
-                            style: const TextStyle(
-                              fontSize: 13,
+                            trailing: const Icon(
+                              CupertinoIcons.chevron_forward,
                               color: CupertinoColors.systemGrey,
                             ),
-                          ),
-                          trailing: const Icon(
-                            CupertinoIcons.chevron_forward,
-                            color: CupertinoColors.systemGrey,
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => AppsPage(source: source),
+                            onTap: () => Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => AppsPage(source: source),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }, childCount: filteredSources.length),
+                      );
+                    }, childCount: filteredSources.length),
+                  ),
                 ),
         ],
       ),
