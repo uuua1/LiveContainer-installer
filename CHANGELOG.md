@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.6
+- Fix issue with bottom navigation bar hiding apps
+- Optimize app loading logic to load app lists faster for repos with 1000+ apps
+- Removed database for apps and screenshots to store them in memory for better performance
+
 ## v0.1.5
 - Fix issue with importing recommended sources
 
