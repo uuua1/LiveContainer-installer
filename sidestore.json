@@ -11,14 +11,14 @@
       "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
       "developerName": "Ashutosh Sharma",
       "subtitle": "App installer for LiveContainer",
-      "version": "0.1.5",
-      "versionDate": "2025-09-08",
-      "versionDescription": "- Fix issue with importing recommended sources",
-      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v0.1.5/LcInstaller.ipa",
+      "version": "0.1.6",
+      "versionDate": "2025-09-09",
+      "versionDescription": "- Fix issue with bottom navigation bar hiding apps\n- Optimize app loading logic to load app lists faster for repos with 1000+ apps\n- Removed database for apps and screenshots to store them in memory for better performance",
+      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v0.1.6/LcInstaller.ipa",
       "localizedDescription": "Install apps on LiveContainer from different sources with ease!",
       "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
       "tintColor": "#307CFF",
-      "size": 8064425
+      "size": 8056715
     }
   ]
 }
