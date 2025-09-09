@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0
+- Implement AppViewPage where you can see details and screenshots of the app
+- Version History page to allow users to download older versions of the app
+- UI optimization
+- App loading speed optimization
+
 ## v0.1.6
 - Fix issue with bottom navigation bar hiding apps
 - Optimize app loading logic to load app lists faster for repos with 1000+ apps
