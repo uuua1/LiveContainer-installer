@@ -11,15 +11,22 @@
       "bundleIdentifier": "site.ashutoshportfolio.lcinstaller",
       "developerName": "Ashutosh Sharma",
       "subtitle": "App installer for LiveContainer",
-      "version": "1.0.1",
-      "versionDate": "2025-09-12T02:20:33Z",
-      "versionDescription": "- UI Improvement for larger Icons and better view\n- All Repository added within source page to view all apps",
-      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v1.0.1/LcInstaller.ipa",
+      "version": "1.1.0",
+      "versionDate": "2025-09-12T05:56:55Z",
+      "versionDescription": "- Library page now shows installed apps and available updates.\n- Workaround implemented to track installed app. (Does not retrieve data from Live Container)",
+      "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v1.1.0/LcInstaller.ipa",
       "localizedDescription": "Install apps on LiveContainer from different sources with ease!",
       "iconURL": "https://raw.githubusercontent.com/asrma7/LiveContainer-installer/main/screenshots/100.png",
       "tintColor": "#307CFF",
-      "size": 8077929,
+      "size": 8095096,
       "versions": [
+        {
+          "version": "1.1.0",
+          "date": "2025-09-12T05:56:55Z",
+          "downloadURL": "https://github.com/asrma7/LiveContainer-installer/releases/download/v1.1.0/LcInstaller.ipa",
+          "localizedDescription": "- Library page now shows installed apps and available updates.\n- Workaround implemented to track installed app. (Does not retrieve data from Live Container)",
+          "size": 8095096
+        },
         {
           "version": "1.0.1",
           "date": "2025-09-12T02:20:33Z",
