@@ -1,24 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:lcinstaller/screens/library_page.dart';
 import 'package:lcinstaller/screens/sources_page.dart';
-import 'package:lcinstaller/screens/apps_page.dart';
 import 'package:lcinstaller/screens/settings_page.dart';
-import 'package:lcinstaller/notifiers/apps_notifier.dart';
-import 'package:provider/provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.mounted) {
-        Provider.of<AppsNotifier>(context, listen: false).refreshApps();
-      }
-    });
-
     return const CupertinoApp(
-      debugShowCheckedModeBanner: false,
+      // debugShowCheckedModeBanner: false,
       home: MainTabScaffold(),
     );
   }
@@ -51,11 +43,11 @@ class MainTabScaffold extends StatelessWidget {
           case 0:
             return const SourcesPage();
           case 1:
-            return const AppsPage();
+            return const LibraryPage();
           case 2:
             return const SettingsPage();
           default:
-            return const AppsPage();
+            return const LibraryPage();
         }
       },
     );

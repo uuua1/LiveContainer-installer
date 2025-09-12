@@ -7,9 +7,11 @@ import 'dart:convert';
 
 class AppsNotifier extends ChangeNotifier {
   List<AppWithSource> _apps = [];
+  Map<String, AppWithSource> _appMap = {};
   bool _isLoading = false;
 
   List<AppWithSource> get apps => _apps;
+  Map<String, AppWithSource> get appMap => _appMap;
   bool get isLoading => _isLoading;
 
   Future<void> fetchApps() async {
@@ -27,6 +29,9 @@ class AppsNotifier extends ChangeNotifier {
       }
 
       _apps = allApps;
+      _appMap = {
+        for (var app in allApps) "${app.bundleIdentifier}_${app.sourceId}": app,
+      };
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching apps: $e');

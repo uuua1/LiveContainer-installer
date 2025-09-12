@@ -19,14 +19,13 @@ class DatabaseHelper {
     final path = join(dbPath, 'liveapps.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
   }
 
   Future _onCreate(Database db, int version) async {
-    // Create the sources table only
     await db.execute('''
     CREATE TABLE sources (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +40,19 @@ class DatabaseHelper {
     )
   ''');
 
-    // Insert default source
+    await db.execute('''
+    CREATE TABLE installed_apps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      bundleIdentifier TEXT,
+      version TEXT,
+      versionDate TEXT,
+      iconURL TEXT,
+      sourceId INTEGER,
+      FOREIGN KEY (sourceId) REFERENCES sources (id)
+    )
+  ''');
+
     await db.insert('sources', {
       "id": 1,
       "name": "LcInstaller Repo",
@@ -60,10 +71,23 @@ class DatabaseHelper {
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 3) {
-      // Drop app-related tables as we're moving to memory-only storage
       await db.execute('DROP TABLE IF EXISTS screenshots');
       await db.execute('DROP TABLE IF EXISTS versions');
       await db.execute('DROP TABLE IF EXISTS apps');
+    }
+    if (oldVersion < 4) {
+      await db.execute('''
+      CREATE TABLE installed_apps (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        bundleIdentifier TEXT,
+        version TEXT,
+        versionDate TEXT,
+        iconURL TEXT,
+        sourceId INTEGER,
+        FOREIGN KEY (sourceId) REFERENCES sources (id)
+      )
+    ''');
     }
   }
 
@@ -77,8 +101,41 @@ class DatabaseHelper {
     return await db.query('sources');
   }
 
-  Future<int> deleteSourceAndApps(int sourceId) async {
+  Future<int> deleteSource(int sourceId) async {
     final db = await database;
     return await db.delete('sources', where: 'id = ?', whereArgs: [sourceId]);
+  }
+
+  Future<int> insertInstalledApp(Map<String, dynamic> app) async {
+    final db = await database;
+    final existing = await db.query(
+      'installed_apps',
+      where: 'bundleIdentifier = ? AND sourceId = ?',
+      whereArgs: [app['bundleIdentifier'], app['sourceId']],
+    );
+    if (existing.isNotEmpty) {
+      return await db.update(
+        'installed_apps',
+        {...app, 'id': existing.first['id']},
+        where: 'id = ?',
+        whereArgs: [existing.first['id']],
+      );
+    } else {
+      return await db.insert('installed_apps', app);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getInstalledApps() async {
+    final db = await database;
+    return await db.query('installed_apps');
+  }
+
+  Future<int> deleteInstalledApp(int appId) async {
+    final db = await database;
+    return await db.delete(
+      'installed_apps',
+      where: 'id = ?',
+      whereArgs: [appId],
+    );
   }
 }

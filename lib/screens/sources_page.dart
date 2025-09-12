@@ -122,9 +122,6 @@ class _SourcesPageState extends State<SourcesPage> {
 
                       await DatabaseHelper().insertSource(newSource.toMap());
 
-                      // Note: Apps are no longer stored in database
-                      // They will be fetched fresh from sources when needed
-
                       if (context.mounted) {
                         try {
                           final provider = Provider.of<AppsNotifier>(
@@ -330,7 +327,7 @@ class _SourcesPageState extends State<SourcesPage> {
                                   isDestructiveAction: true,
                                   onPressed: () async {
                                     Navigator.pop(context);
-                                    await DatabaseHelper().deleteSourceAndApps(
+                                    await DatabaseHelper().deleteSource(
                                       source.id!,
                                     );
                                     if (context.mounted) {

@@ -84,8 +84,11 @@ class VersionHistoryPage extends StatelessWidget {
                         ),
                       ),
                     ElevatedButton(
-                      onPressed: () =>
-                          installInLiveContainer(version.downloadURL),
+                      onPressed: () => installInLiveContainer(
+                        context,
+                        app,
+                        version: version,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

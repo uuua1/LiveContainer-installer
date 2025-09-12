@@ -101,11 +101,6 @@ class _AppsPageState extends State<AppsPage> {
         return CupertinoPageScaffold(
           child: CustomScrollView(
             slivers: [
-              CupertinoSliverRefreshControl(
-                onRefresh: () async {
-                  await appsNotifier.refreshApps();
-                },
-              ),
               CupertinoSliverNavigationBar(
                 largeTitle: Text(
                   widget.source == null ? 'All Apps' : widget.source!.name,
@@ -130,6 +125,11 @@ class _AppsPageState extends State<AppsPage> {
                   ),
                 ),
                 border: null,
+              ),
+              CupertinoSliverRefreshControl(
+                onRefresh: () async {
+                  await appsNotifier.refreshApps();
+                },
               ),
               SliverPersistentHeader(
                 pinned: true,
@@ -257,9 +257,8 @@ class _AppsPageState extends State<AppsPage> {
                                               padding: EdgeInsets.zero,
                                               onPressed: () =>
                                                   installInLiveContainer(
-                                                    app
-                                                        .latestVersion
-                                                        .downloadURL,
+                                                    context,
+                                                    app,
                                                   ),
                                               child: Icon(
                                                 Ionicons.download_outline,
