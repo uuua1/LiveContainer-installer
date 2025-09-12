@@ -198,7 +198,7 @@ class _SourcesPageState extends State<SourcesPage> {
           ),
 
           SliverToBoxAdapter(
-            child: GestureDetector(
+            child: CupertinoButton(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -262,7 +262,7 @@ class _SourcesPageState extends State<SourcesPage> {
                   ),
                 ],
               ),
-              onTap: () => Navigator.push(
+              onPressed: () => Navigator.push(
                 context,
                 CupertinoPageRoute(builder: (context) => AppsPage()),
               ),
@@ -316,12 +316,14 @@ class _SourcesPageState extends State<SourcesPage> {
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final source = filteredSources[index];
                       return GestureDetector(
+                        behavior: HitTestBehavior
+                            .opaque, // ensures empty space is tappable
                         onLongPress: () {
                           showCupertinoModalPopup(
                             context: context,
                             builder: (context) => CupertinoActionSheet(
                               title: Text(source.name),
-                              message: Text('Choose an action'),
+                              message: const Text('Choose an action'),
                               actions: [
                                 CupertinoActionSheetAction(
                                   isDestructiveAction: true,
@@ -377,89 +379,94 @@ class _SourcesPageState extends State<SourcesPage> {
                             ),
                           );
                         },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                top: (index == filteredSources.length - 1)
-                                    ? 0
-                                    : 14,
-                                left: 16,
-                                right: 12,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  source.iconURL,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero, // remove default padding
+                          onPressed: () => Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => AppsPage(source: source),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                  top: (index == filteredSources.length - 1)
+                                      ? 0
+                                      : 14,
+                                  left: 16,
+                                  right: 12,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    source.iconURL,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Divider(
-                                    color: CupertinoColors.systemGrey5
-                                        .resolveFrom(context),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                      horizontal: 16.0,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(source.name),
-                                              Text(
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                source.subtitle.isNotEmpty
-                                                    ? source.subtitle
-                                                    : (source
-                                                                  .description
-                                                                  ?.isNotEmpty ==
-                                                              true
-                                                          ? source.description
-                                                          : source.sourceURL)!,
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: CupertinoColors
-                                                      .systemGrey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Icon(
-                                          CupertinoIcons.chevron_forward,
-                                          color: CupertinoColors.systemGrey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (index == filteredSources.length - 1)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Divider(
                                       color: CupertinoColors.systemGrey5
                                           .resolveFrom(context),
                                     ),
-                                ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                        horizontal: 16.0,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(source.name),
+                                                Text(
+                                                  source.subtitle.isNotEmpty
+                                                      ? source.subtitle
+                                                      : (source
+                                                                    .description
+                                                                    ?.isNotEmpty ==
+                                                                true
+                                                            ? source
+                                                                  .description!
+                                                            : source.sourceURL),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: CupertinoColors
+                                                        .systemGrey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const Icon(
+                                            CupertinoIcons.chevron_forward,
+                                            color: CupertinoColors.systemGrey,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (index == filteredSources.length - 1)
+                                      Divider(
+                                        color: CupertinoColors.systemGrey5
+                                            .resolveFrom(context),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        onTap: () => Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => AppsPage(source: source),
+                            ],
                           ),
                         ),
                       );

@@ -171,8 +171,8 @@ class _AppsPageState extends State<AppsPage> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final app = sortedApps[index];
-                          return GestureDetector(
-                            onTap: () {
+                          return CupertinoButton(
+                            onPressed: () {
                               Navigator.push(
                                 context,
                                 CupertinoPageRoute(

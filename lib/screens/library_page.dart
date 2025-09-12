@@ -177,7 +177,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     final app = filteredUpdates[index];
                     final fullApp =
                         appMap["${app.bundleIdentifier}_${app.sourceId}"];
-                    return GestureDetector(
+                    return CupertinoButton(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -261,7 +261,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           ),
                         ],
                       ),
-                      onTap: () => Navigator.push(
+                      onPressed: () => Navigator.push(
                         context,
                         CupertinoPageRoute(
                           builder: (context) => AppViewPage(app: fullApp!),
@@ -341,12 +341,13 @@ class _LibraryPageState extends State<LibraryPage> {
                       final fullApp =
                           appMap["${app.bundleIdentifier}_${app.sourceId}"];
                       return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onLongPress: () {
                           showCupertinoModalPopup(
                             context: context,
                             builder: (context) => CupertinoActionSheet(
                               title: Text(app.name),
-                              message: Text('Choose an action'),
+                              message: const Text('Choose an action'),
                               actions: [
                                 CupertinoActionSheetAction(
                                   isDestructiveAction: true,
@@ -369,8 +370,8 @@ class _LibraryPageState extends State<LibraryPage> {
                                             return CupertinoAlertDialog(
                                               title: const Text('App Deleted'),
                                               content: Text(
-                                                // App only deleted from library, not from LiveContainer
-                                                '${app.name} has been removed from your library (you can still find it in LiveContainer).',
+                                                '${app.name} has been removed from your library '
+                                                '(you can still find it in LiveContainer).',
                                               ),
                                               actions: [
                                                 CupertinoDialogAction(
@@ -395,91 +396,97 @@ class _LibraryPageState extends State<LibraryPage> {
                             ),
                           );
                         },
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(
-                                top: (index == filteredApps.length - 1)
-                                    ? 0
-                                    : 14,
-                                left: 16,
-                                right: 12,
+                        child: CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) =>
+                                    AppViewPage(app: fullApp!),
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  app.iconURL,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
+                            );
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(
+                                  top: (index == filteredApps.length - 1)
+                                      ? 0
+                                      : 14,
+                                  left: 16,
+                                  right: 12,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    app.iconURL,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Divider(
-                                    color: CupertinoColors.systemGrey5
-                                        .resolveFrom(context),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                      horizontal: 16.0,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Divider(
+                                      color: CupertinoColors.systemGrey5
+                                          .resolveFrom(context),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '${app.name} (${app.version})',
-                                              ),
-                                              if (fullApp != null)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                        horizontal: 16.0,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
                                                 Text(
-                                                  fullApp.source.name,
+                                                  '${app.name} (${app.version})',
+                                                ),
+                                                if (fullApp != null)
+                                                  Text(
+                                                    fullApp.source.name,
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: CupertinoColors
+                                                          .systemGrey,
+                                                    ),
+                                                  ),
+                                                Text(
+                                                  app.bundleIdentifier,
                                                   style: const TextStyle(
                                                     fontSize: 13,
                                                     color: CupertinoColors
                                                         .systemGrey,
                                                   ),
                                                 ),
-                                              Text(
-                                                app.bundleIdentifier,
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: CupertinoColors
-                                                      .systemGrey,
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        Icon(
-                                          CupertinoIcons.chevron_forward,
-                                          color: CupertinoColors.systemGrey,
-                                        ),
-                                      ],
+                                          const Icon(
+                                            CupertinoIcons.chevron_forward,
+                                            color: CupertinoColors.systemGrey,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  if (index == filteredApps.length - 1)
-                                    Divider(
-                                      color: CupertinoColors.systemGrey5
-                                          .resolveFrom(context),
-                                    ),
-                                ],
+                                    if (index == filteredApps.length - 1)
+                                      Divider(
+                                        color: CupertinoColors.systemGrey5
+                                            .resolveFrom(context),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        onTap: () => Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => AppViewPage(app: fullApp!),
+                            ],
                           ),
                         ),
                       );
