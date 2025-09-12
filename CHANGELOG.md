@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1
+- UI Improvement for larger Icons and better view
+- All Repository added within source page to view all apps
+
 ## v1.0.0
 - Implement AppViewPage where you can see details and screenshots of the app
 - Version History page to allow users to download older versions of the app
