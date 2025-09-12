@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.0
+- Library page now shows installed apps and available updates.
+- Workaround implemented to track installed app. (Does not retrieve data from Live Container)
+
 ## v1.0.1
 - UI Improvement for larger Icons and better view
 - All Repository added within source page to view all apps
