@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:lcinstaller/screens/add_source_page.dart';
 import 'package:lcinstaller/models/source.dart';
 import 'package:lcinstaller/database_helper.dart';
 import 'package:lcinstaller/screens/apps_page.dart';
+import 'package:lcinstaller/widgets/header_delegate.dart';
+import 'package:lcinstaller/widgets/search_bar_delegate.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
 import 'package:http/http.dart' as http;
@@ -188,7 +191,7 @@ class _SourcesPageState extends State<SourcesPage> {
 
           SliverPersistentHeader(
             pinned: true,
-            delegate: _SearchBarDelegate(
+            delegate: SearchBarDelegate(
               onChanged: (query) {
                 setState(() {
                   searchQuery = query;
@@ -198,23 +201,105 @@ class _SourcesPageState extends State<SourcesPage> {
           ),
 
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
+            child: GestureDetector(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 60,
+                    width: 60,
+                    margin: const EdgeInsets.only(left: 16, right: 12),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Ionicons.planet_outline, size: 40),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Divider(
+                          color: CupertinoColors.systemGrey5.resolveFrom(
+                            context,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12.0,
+                            horizontal: 16.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('All Repositories'),
+                                    Text(
+                                      'See all apps from your sources',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: CupertinoColors.systemGrey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                CupertinoIcons.chevron_forward,
+                                color: CupertinoColors.systemGrey,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(
+                          color: CupertinoColors.systemGrey5.resolveFrom(
+                            context,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (context) => AppsPage()),
+              ),
+            ),
+          ),
+
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: HeaderDelegate(
+              minHeight: 45,
+              maxHeight: 45,
+              headerWidget: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Repositories',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    filteredSources.length.toString(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: CupertinoColors.systemGrey,
+                  Container(
+                    height: 20,
+                    width: 20,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        filteredSources.length.toString(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: CupertinoColors.systemGrey,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -233,101 +318,151 @@ class _SourcesPageState extends State<SourcesPage> {
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final source = filteredSources[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: GestureDetector(
-                          onLongPress: () {
-                            showCupertinoModalPopup(
-                              context: context,
-                              builder: (context) => CupertinoActionSheet(
-                                title: Text(source.name),
-                                message: Text('Choose an action'),
-                                actions: [
-                                  CupertinoActionSheetAction(
-                                    isDestructiveAction: true,
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await DatabaseHelper()
-                                          .deleteSourceAndApps(source.id!);
-                                      if (context.mounted) {
-                                        final provider =
-                                            Provider.of<AppsNotifier>(
-                                              context,
-                                              listen: false,
-                                            );
-                                        await provider.refreshApps();
-                                        await fetchSources();
-                                      }
-                                    },
-                                    child: const Text('Delete'),
-                                  ),
-                                  CupertinoActionSheetAction(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Clipboard.setData(
-                                        ClipboardData(text: source.sourceURL),
-                                      );
-                                      showCupertinoDialog(
-                                        context: context,
-                                        builder: (dialogContext) =>
-                                            CupertinoAlertDialog(
-                                              title: const Text('Copied'),
-                                              content: const Text(
-                                                'Source URL copied to clipboard.',
-                                              ),
-                                              actions: [
-                                                CupertinoDialogAction(
-                                                  child: const Text('OK'),
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                        dialogContext,
-                                                      ),
-                                                ),
-                                              ],
+                      return GestureDetector(
+                        onLongPress: () {
+                          showCupertinoModalPopup(
+                            context: context,
+                            builder: (context) => CupertinoActionSheet(
+                              title: Text(source.name),
+                              message: Text('Choose an action'),
+                              actions: [
+                                CupertinoActionSheetAction(
+                                  isDestructiveAction: true,
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await DatabaseHelper().deleteSourceAndApps(
+                                      source.id!,
+                                    );
+                                    if (context.mounted) {
+                                      final provider =
+                                          Provider.of<AppsNotifier>(
+                                            context,
+                                            listen: false,
+                                          );
+                                      await provider.refreshApps();
+                                      await fetchSources();
+                                    }
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                                CupertinoActionSheetAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Clipboard.setData(
+                                      ClipboardData(text: source.sourceURL),
+                                    );
+                                    showCupertinoDialog(
+                                      context: context,
+                                      builder: (dialogContext) =>
+                                          CupertinoAlertDialog(
+                                            title: const Text('Copied'),
+                                            content: const Text(
+                                              'Source URL copied to clipboard.',
                                             ),
-                                      );
-                                    },
-                                    child: const Text('Copy URL'),
-                                  ),
-                                ],
-                                cancelButton: CupertinoActionSheetAction(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
+                                            actions: [
+                                              CupertinoDialogAction(
+                                                child: const Text('OK'),
+                                                onPressed: () => Navigator.pop(
+                                                  dialogContext,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  },
+                                  child: const Text('Copy URL'),
+                                ),
+                              ],
+                              cancelButton: CupertinoActionSheetAction(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                top: (index == filteredSources.length - 1)
+                                    ? 0
+                                    : 14,
+                                left: 16,
+                                right: 12,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  source.iconURL,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            );
-                          },
-                          child: CupertinoListTile(
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                source.iconURL,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Divider(
+                                    color: CupertinoColors.systemGrey5
+                                        .resolveFrom(context),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0,
+                                      horizontal: 16.0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(source.name),
+                                              Text(
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                source.subtitle.isNotEmpty
+                                                    ? source.subtitle
+                                                    : (source
+                                                                  .description
+                                                                  ?.isNotEmpty ==
+                                                              true
+                                                          ? source.description
+                                                          : source.sourceURL)!,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: CupertinoColors
+                                                      .systemGrey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          CupertinoIcons.chevron_forward,
+                                          color: CupertinoColors.systemGrey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (index == filteredSources.length - 1)
+                                    Divider(
+                                      color: CupertinoColors.systemGrey5
+                                          .resolveFrom(context),
+                                    ),
+                                ],
                               ),
                             ),
-                            title: Text(source.name),
-                            subtitle: Text(
-                              source.sourceURL,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.systemGrey,
-                              ),
-                            ),
-                            trailing: const Icon(
-                              CupertinoIcons.chevron_forward,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                            onTap: () => Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (context) => AppsPage(source: source),
-                              ),
-                            ),
+                          ],
+                        ),
+                        onTap: () => Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => AppsPage(source: source),
                           ),
                         ),
                       );
@@ -338,35 +473,4 @@ class _SourcesPageState extends State<SourcesPage> {
       ),
     );
   }
-}
-
-class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
-  final ValueChanged<String> onChanged;
-  _SearchBarDelegate({required this.onChanged});
-
-  @override
-  double get minExtent => 60;
-  @override
-  double get maxExtent => 60;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      height: maxExtent,
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      padding: const EdgeInsets.all(8.0),
-      child: CupertinoSearchTextField(
-        placeholder: "Search",
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
 }

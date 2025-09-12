@@ -4,6 +4,8 @@ import 'package:ionicons/ionicons.dart';
 import 'package:lcinstaller/models/source.dart';
 import 'package:lcinstaller/screens/app_view_page.dart';
 import 'package:lcinstaller/utils/utils.dart';
+import 'package:lcinstaller/widgets/header_delegate.dart';
+import 'package:lcinstaller/widgets/search_bar_delegate.dart';
 import 'package:provider/provider.dart';
 import 'package:lcinstaller/notifiers/apps_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -131,7 +133,7 @@ class _AppsPageState extends State<AppsPage> {
               ),
               SliverPersistentHeader(
                 pinned: true,
-                delegate: _SearchBarDelegate(
+                delegate: SearchBarDelegate(
                   onChanged: (query) {
                     setState(() {
                       searchQuery = query;
@@ -139,19 +141,23 @@ class _AppsPageState extends State<AppsPage> {
                   },
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: Text(
-                    "${sortedApps.length} Apps",
+              SliverToBoxAdapter(child: const SizedBox(height: 30.0)),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: HeaderDelegate(
+                  headerWidget: Text(
+                    '${sortedApps.length} Apps',
                     style: const TextStyle(
                       fontSize: 16,
+                      fontWeight: FontWeight.w700,
                       color: CupertinoColors.systemGrey,
                     ),
                   ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Divider(
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
                 ),
               ),
               isLoading
@@ -165,78 +171,114 @@ class _AppsPageState extends State<AppsPage> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           final app = sortedApps[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: CupertinoListTile(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => AppViewPage(app: app),
-                                  ),
-                                );
-                              },
-                              leading: Stack(
-                                children: [
-                                  Image.network(
-                                    app.iconURL,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: CupertinoColors.systemBackground
-                                            .withAlpha(200),
-                                        borderRadius: BorderRadius.circular(34),
-                                      ),
-                                      child: Image.network(
-                                        app.source.iconURL,
-                                        width: 14,
-                                        height: 14,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              title: Text(app.name),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Version: ${app.latestVersion.version}",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: CupertinoColors.systemGrey,
-                                    ),
-                                  ),
-                                  Text(
-                                    app.localizedDescription,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: CupertinoColors.systemGrey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              trailing: CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () => installInLiveContainer(
-                                  app.latestVersion.downloadURL,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => AppViewPage(app: app),
                                 ),
-                                child: Icon(
-                                  Ionicons.download_outline,
-                                  size: 24,
-                                  color: CupertinoColors.activeBlue,
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(
+                                    left: 16.0,
+                                    right: 12.0,
+                                    bottom: 16.0,
+                                  ),
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          app.iconURL,
+                                          width: 60,
+                                          height: 60,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: -6,
+                                        right: -6,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            34,
+                                          ),
+                                          child: Image.network(
+                                            app.source.iconURL,
+                                            width: 20,
+                                            height: 20,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(app.name),
+                                                Text(
+                                                  "Version: ${app.latestVersion.version}",
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: CupertinoColors
+                                                        .systemGrey,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  app.localizedDescription,
+                                                  maxLines: 2,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: CupertinoColors
+                                                        .systemGrey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 8.0,
+                                            ),
+                                            child: CupertinoButton(
+                                              padding: EdgeInsets.zero,
+                                              onPressed: () =>
+                                                  installInLiveContainer(
+                                                    app
+                                                        .latestVersion
+                                                        .downloadURL,
+                                                  ),
+                                              child: Icon(
+                                                Ionicons.download_outline,
+                                                size: 24,
+                                                color:
+                                                    CupertinoColors.activeBlue,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(
+                                        color: CupertinoColors.systemGrey5
+                                            .resolveFrom(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         }, childCount: sortedApps.length),
@@ -271,35 +313,4 @@ class _AppsPageState extends State<AppsPage> {
       ),
     );
   }
-}
-
-class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
-  final ValueChanged<String> onChanged;
-  _SearchBarDelegate({required this.onChanged});
-
-  @override
-  double get minExtent => 60;
-  @override
-  double get maxExtent => 60;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      height: maxExtent,
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      padding: const EdgeInsets.all(8.0),
-      child: CupertinoSearchTextField(
-        placeholder: "Search",
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
-      false;
 }
